@@ -52,7 +52,7 @@ do
 		
 		s|S)
 		
-			sudo groupdel "$NombreGrupo" 2> /dev/null
+			sudo groupdel "$NombreGrupo" 2> null
 			Resultado="$?"
 			
 			case "$Resultado" in

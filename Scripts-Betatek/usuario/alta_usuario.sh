@@ -119,9 +119,10 @@ FuncionNombreUsuario(){
 while true
 
 do	
+	FuncionEncabezado
 	echo -e "\nIngrese nombre del usuario.\n(Ingrese '0' para salir)\n"
 	read -p "_: " NombreUsuario
-	
+	NombreUsuario=`echo $NombreUsuario | tr [:upper:] [:lower:]`
 	if [ "$NombreUsuario" = 0 ]
 	then
 		FuncionSalir
@@ -180,7 +181,7 @@ done
 FuncionNombreHome(){
 while true
 do
-	clear
+	FuncionEncabezado
 
 	echo -e 
 	read -p "Ingrese nombre para el home : " NombreHome
@@ -220,6 +221,7 @@ done
 FuncionRutaHome(){
 while true
 do
+	FuncionEncabezado
 	read -p "Ingrese ruta del home : " RutaHome
 	if [ ! -z $RutaHome ]
 	then
@@ -244,107 +246,240 @@ do
 	fi
 done
 }
+
+FuncionGrupo(){
+while true
+do
+	#Quitar
+	NombreUsuario="Prueba"
+	#quitar	
+	#GrupoPrincipal
+	while true
+	do
+		FuncionEncabezado
+		
+		echo -e "Desea establecer un grupo para el usuario? s/n (Grupo por defecto '$NombreUsuario')\n"
+		
+		read -p "_: " Respuesta
+			if [ -z "$Respuesta" ] || [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
+		then
+			GrupoUsuario=`echo "$NombreUsuario"`
+			break
+				
+		elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
+		then
+			while true
+			do
+
+				FuncionEncabezado
+				echo "Ingrese grupo:"
+				echo -e "(ingrese 0 para utilizar el grupo por defecto, ingrese 00 para volver al Menu Principal.)\n"
+				read -p "_: " GrupoUsuario
+				if [ -z $GrupoUsuario ]
+				then
+					echo -e "\nCampo Vacio!.."
+				else
+					if [ "$GrupoUsuario" = "0" ]
+					then
+						GrupoUsuario=`echo $NombreUsuario`
+						break 2
+					elif [ "$GrupoUsuario" = "00" ]
+					then
+						exit
+					fi
+		
+					if [ `cat /etc/group | cut -f1 -d: | grep -x $GrupoUsuario | wc -l` = 1 ]
+					then
+						break 2
+					else
+						echo -e "\nEl grupo no existe!.."
+					fi
+				fi
+			sleep 1
+			done
+			
+		else
+			echo -e "\n Opcion Invalida...!"
+		fi
+		
+		
+		sleep 1
+	done
+	
+	#GruposSecundarios
+	while true
+	do
+		FuncionEncabezado
+		
+		echo -e "Desea agregar otro grupo al usuario? s/n (Grupos actuales del usuario '$GrupoUsuario')\n"
+		
+		read -p "_: " Respuesta
+			if [ -z "$Respuesta" ] || [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
+		then
+			break 2
+				
+		elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
+		then
+			while true
+			do
+
+				FuncionEncabezado
+				echo "Ingrese grupo (Grupos actuales del usuario :'$GrupoUsuario', ingrese 0 para salir): "
+				read -p "_: " Grupo
+				if [ -z $Grupo ]
+				then
+					echo -e "\nCampo Vacio!.."
+				else
+					if [ "$Grupo" = "0" ]
+					then
+
+						break 3
+					fi
+		
+					if [ ! `cat /etc/group | cut -f1 -d: | grep -x $GrupoUsuario | wc -l` = 1 ]
+					then
+						echo -e "\nGrupo Agregado..\n"
+						GrupoUsuario=`echo "$GrupoUsuario,$Grupo"`
+						while true
+						do
+							echo -e "Desea agregar otro usuario? s/n"
+							read -p "_: " Opcion
+							
+							case $Opcion in
+							s|S)
+								break
+							;;
+							n|N)
+								break 4
+							;;
+							*)
+								echo -e "\nOpcion Invalida!..."
+								sleep 1
+							esac
+						done
+					else
+						echo -e "\nEl grupo no existe!.."
+					fi
+				fi
+			sleep 1
+			done
+			
+		else
+			echo -e "\n Opcion Invalida...!"
+		fi
+		
+		
+		sleep 1
+	done
+	
+done
+#Quitar
+	echo "salir, grupo_ '$GrupoUsuario'"
+	sleep 1
+	exit
+	#Fin-Quitar
+}
 #FinFunciones
 
-#RutaHome
+#Ejecucion
 while true
 do
-	FuncionEncabezado
-	echo -e "\nDesea especificar una ruta para el home del usuario? s/n (Por defecto '/home') \n"
-	read -p "_: " Respuesta
+	NombreUsuario=""
+	Clave=""
+	RutaHome=""
+	NombreHome=""
+	GrupoUsuario=""
+	#Nombre
+	FuncionNombre
+	#FinNombre
+	
+	#Contraseña
+	FuncionContraseña
+	#FinContraseña
 
-	
+	#Grupo
+	FuncionGrupo
+	#FinGrupo
 		
-	if [ -z "$Respuesta" ] || [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
-	then
-		RutaHome="/home"
-		break
+	#RutaHome
+	while true
+	do
+		FuncionEncabezado
+		echo -e "\nDesea especificar una ruta para el home del usuario? s/n (Por defecto '/home') \n"
+		read -p "_: " Respuesta
+
 		
+			
+		if [ -z "$Respuesta" ] || [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
+		then
+			RutaHome="/home"
+			break
+			
+		
+		elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
+		then
+			FuncionRutaHome
+			break
+		else
+			echo -e "\n Opcion Invalida...!"
+		fi
+		
+	done
+	#FinRutaHome
+
+	#NombreHome
+	while true
+	do
+		FuncionEncabezado
+		echo -e "\nDesea especificar un nombre para el home del usuario? s/n (Por defecto '$NombreUsuario') \n"
+		read -p "_: " Respuesta
+
+		
+			
+		if [ -z "$Respuesta" ] || [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
+		then
+			NombreHome=`echo "$NombreUsuario"`
+			break
+			
+		
+		elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
+		then
+			FuncionNombreHome
+			break
+		else
+			echo -e "\n Opcion Invalida...!"
+		fi
+		sleep 1
+	done
+	#FinNombreHome
 	
-	elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
-	then
-		FuncionRutaHome
-		break
-	else
-		echo -e "\n Opcion Invalida...!"
-	fi
+	#EjecutarAlta
+	Home=`echo "$RutaHome$NombreHome"`
 	
+	sudo useradd  -G${GrupoUsuario} ${Home} ${NombreUsuario}
+	if [ $? = 0 ]
+	#FinEjecutarAlta
+
 done
+#FinEjecucion
 
 
-#FinRutaHome
-#NombreHome
-while true
-do
-	FuncionEncabezado
-	echo -e "\nDesea especificar un nombre para el home del usuario? s/n (Por defecto '$NombreUsuario') \n"
-	read -p "_: " Respuesta
 
-	
-		
-	if [ -z "$Respuesta" ] || [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
-	then
-		NombreHome=`echo "$NombreUsuario"`
-		break
-		
-	
-	elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
-	then
-		FuncionNombreHome
-		break
-	else
-		echo -e "\n Opcion Invalida...!"
-	fi
-	sleep 1
-done
-#FinNombreHome
+#Grupos
+
+#FinGrupos
+
 echo "Fin"
 sleep 2
 exit	
 
-FuncionHome
+FuncionNombre
+FuncionContraseña
+FuncionGrupo
+FuncionRutaHome
+FuncionNombreHome
 
-#d
-while true
-do
-	FuncionEncabezado
-	Nombre=""
-	Comentario=""
-	Home=""
-	Contrasenia=""
-	Grupos=""
 
-	echo -e "\n"
-	echo -e "\tMenu:"
-	echo -e "\n\t1-Nombre: $NombreUsuario"
-	echo -e "\n\t2-Comentario: $Comentario"
-	echo -e "\n\t3-Home: $Home"
-	echo -e "\n\t4-Contraseña: $Contrasenia"
-	echo -e "\n\t5-Grupos: $Grupos"
-	echo -e "\n\n\t0-Crear Usuario."
-	echo -e "\t00-Salir."
-
-	read -p "_: " Opcion
-
-	case in $Opcion
-	
-		1) FuncionNombre	
-		;;
-		2) FuncionComentario
-		;;
-		3) FuncionHome
-		;;
-		4) FuncionContrasena
-		;;
-		5) FuncionGrupos
-		;;
-		0) FuncionCrearUsuario
-		;;
-		*) echo -e "\n\nOpcion Equivocada..."
-	
-	esac 
-
-done
 
 
 #FinAltaUsuario

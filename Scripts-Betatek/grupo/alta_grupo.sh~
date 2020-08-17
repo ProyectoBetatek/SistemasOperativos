@@ -122,8 +122,7 @@ while true
 do	
 	echo -e "\nIngrese nombre del grupo.\n(Ingrese '0' para salir)\n"
 	read -p "_: " Nombre
-	Nombre=`echo $Nombre | tr [:upper:] [:lower:]`
-
+	
 	if [ "$Nombre" = 0 ]
 	then
 		FuncionSalir
