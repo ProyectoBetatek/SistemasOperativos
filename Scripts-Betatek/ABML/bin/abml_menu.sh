@@ -1,6 +1,6 @@
 #! /bin/bash
 #Betatek
-#Script menu.
+#Script menú.
 
 let op=-1
 
@@ -27,38 +27,38 @@ do
 	
 	case $op in
 		1) 
-			sh ./usuario/alta_usuario.sh
+			sh ./alta_usuario.sh
 		;;
 
 		2) 
-			sh ./usuario/modificar_usuario.sh
+			sh ./modificar_usuario.sh
 		;;
 
 
 		3) 
-			sh ./usuario/eliminar_usuario.sh
+			sh ./eliminar_usuario.sh
 		;;
 
 
 		4) 
-			sh ./usuario/listar_usuario.sh
+			sh ./listar_usuario.sh
 		;;
 
 
 		5) 
-			sh ./grupo/alta_grupo.sh
+			sh ./alta_grupo.sh
 		;;
 
 		6) 
-			sh ./grupo/modificar_grupo.sh
+			sh ./modificar_grupo.sh
 		;;
 
 		7) 
-			sh ./grupo/eliminar_grupo.sh
+			sh ./eliminar_grupo.sh
 		;;
 
 		8) 
-			sh ./grupo/listar_grupo.sh
+			sh ./listar_grupo.sh
 		;;
 
 		0) clear 
