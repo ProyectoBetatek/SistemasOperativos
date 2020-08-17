@@ -109,7 +109,6 @@ while true
 do	
 	echo ""
 	read -p "Ingrese nuevo nombre del grupo: " Nombre
-	Nombre=`echo $Nombre | tr [:upper:] [:lower:]`
 	#Revisamos campo vacio
 	if ! [ -z "$Nombre" ]
 	then
