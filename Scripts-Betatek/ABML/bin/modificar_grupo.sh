@@ -193,13 +193,14 @@ do
 	echo -e "Ingrese el nombre del grupo a modificar.\n(Ingrese '0' para salir) o (Ingrese '*lista*' para poder ver los grupos existentes\n)"
 		
 	read -p "_:" NombreGrupo
-	Resultado=`cat /etc/group | cut -d: -f1 | grep -x "$NombreGrupo" | wc -l`
+	
 	if [ "$NombreGrupo" = "*Lista*" ] || [ "$NombreGrupo" = "*lista*" ] || [ "$NombreGrupo" = "*LISTA*" ]
 	then
 		FuncionListar
 		read -p "Ingrese nombre grupo_:" NombreGrupo
 	fi
-	
+	echo "$NombreGrupo" | tr '[:upper:]' '[:lower:]'
+	Resultado=`cat /etc/group | cut -d: -f1 | grep -x "$NombreGrupo" | wc -l`
 	if [ "$NombreGrupo" = 0 ]
 	then
 		FuncionSalir
