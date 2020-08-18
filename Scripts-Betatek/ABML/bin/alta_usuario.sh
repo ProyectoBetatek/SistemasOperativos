@@ -1,6 +1,7 @@
 #!/bin/bash
 #Betatek
 #AltaUsuario
+
 #Funciones
 
 FuncionEncabezado(){
@@ -9,11 +10,14 @@ echo -e "\n\t\t--Alta Usuarios--\n\n\n"
 
 }
 
+
 FuncionSalir(){
 		clear 
 		sleep 1
 		exit
 }
+
+
 FuncionListarGrupos(){
 Gid=`cat /etc/login.defs | egrep  "^GID_MIN*" |tr -s " " | cut -f2 -d" "`
 TotalLineas=`cat /etc/group | wc -l`
@@ -22,6 +26,8 @@ let Linea=$Linea-1
 let Tail=$TotalLineas-$Linea
 cat /etc/group | tail -n"$Tail" | cut -f1 -d: | column
 }
+
+
 FuncionContrasena(){
 while true
 do	
@@ -119,9 +125,9 @@ una letra mayúzcula, una letra minúzcula, un numero , y un signo.\n\n (signos 
 sleep 2
 clear
 done
-
-
 }
+
+
 FuncionNombreUsuario(){
 
 while true
@@ -188,79 +194,114 @@ do
 done
 }
 
+
 FuncionNombreHome(){
 while true
 do
 	FuncionEncabezado
+	echo -e "\nDesea especificar un nombre para el home del usuario? s/n (Por defecto '$NombreUsuario') \n"
+	read -p "_: " Respuesta
 
-	echo -e 
-	read -p "Ingrese nombre para el home : " NombreHome
-
-	#Revisamos campo vacio
-	if ! [ -z "$NombreHome" ]
-	then
-		#Revisamos que haya ingresado solo carateres alfanumericos
-		if [[ -z `echo $NombreHome | tr -d "[:alnum:]"` ]]
-		then
-
-			CantidadCaracter=`printf $NombreHome | wc -c`
-			#Revisamos que el nombre tenga entre 4 y 30 caracteres
-			if [[ $CantidadCaracter -le 30 ]] && [[ $CantidadCaracter -ge 4 ]]
+	case $Respuesta in
+	n|N)
+		NombreHome=`echo "$NombreUsuario"`
+		break
+		;;
+	s|S)
+		while true
+		do
+			read -p "Ingrese nombre para el home : " NombreHome
+			NombreHome=`echo -e "$NombreHome" | tr tr [:upper:] [:lower:]`
+			#Revisamos campo vacio
+			if ! [ -z "$NombreHome" ]
 			then
-				#Revisamos que no haya espacios
-				if [[ `echo $NombreHome | grep " " | wc -l` = 0 ]]
-				then 
-				
-					break
-				
+				#Revisamos que haya ingresado solo carateres alfanumericos
+				if [[ -z `echo $NombreHome | tr -d "[:alnum:]"` ]]
+				then
+
+					CantidadCaracter=`printf $NombreHome | wc -c`
+					#Revisamos que el nombre tenga entre 4 y 30 caracteres
+					if [[ $CantidadCaracter -le 30 ]] && [[ $CantidadCaracter -ge 4 ]]
+					then
+						#Revisamos que no haya espacios
+						if [[ `echo $NombreHome | grep " " | wc -l` = 0 ]]
+						then 
+						
+							break
+						
+						else
+							echo -e "\nNo se permite que el nombre del home contenga espacios."
+						fi
+					else
+						echo -e "\nEl nombre debe contener entre 4 y 30 caracteres.!"
+					fi
 				else
-					echo -e "\nNo se permite que el nombre del home contenga espacios."
+					echo -e "\nSolo se permite como nombre del home ,caracteres alfanumericos.!"
 				fi
 			else
-				echo -e "\nEl nombre debe contener entre 4 y 30 caracteres.!"
+				echo -e "\nEl campo no puede estar vacio!"
 			fi
-		else
-			echo -e "\nSolo se permite como nombre del home ,caracteres alfanumericos.!"
-		fi
-	else
-		echo -e "\nEl campo no puede estar vacio!"
-	fi
-
+			sleep 2
+		done
+		;;
+	*)
+		echo -e "\nOpcion Invalida!..."
+		;;
+	esac
+	sleep 1
 done
 }
+
+
 FuncionRutaHome(){
 while true
 do
 	FuncionEncabezado
-	read -p "Ingrese ruta del home : " RutaHome
-	if ! [ -z $RutaHome ]
-	then
-		if ! [ `echo "$RutaHome" | egrep "*/$" | wc -l` = "1" ]
-		then
-			RutaHome=`echo "$RutaHome/"`
-		fi
-		
-		
-		if ! [ -d $RutaHome ] 
-		then
-			echo -e "\nLa ruta especificada no es correcta..."
+	echo -e "\nDesea especificar una ruta para el home del usuario? s/n (Por defecto '/home/') \n"
+	read -p "_: " Respuesta
+
+	
+	case $Respuesta in
+	n|N)
+		RutaHome="/home/"
+		break
+		;;
+	s|S)
+		while true
+		do
+			FuncionEncabezado
+			read -p "Ingrese ruta del home : " RutaHome
+			if ! [ -z $RutaHome ]
+			then
+				if ! [ `echo "$RutaHome" | egrep "*/$" | wc -l` = "1" ]
+				then
+					RutaHome=`echo "$RutaHome/"`
+				fi
+				
+				
+				if ! [ -d $RutaHome ] 
+				then
+					echo -e "\nLa ruta especificada no es correcta..."
+					sleep 1
+				else
+					echo "La ruta existe."
+					sleep 1
+					break 2
+				fi
+			fi
 			sleep 1
-		else
-			echo "La ruta existe."
-			sleep 1
-			break
-		fi
-	else
-		echo -e "\nCampo Vacio!.."
-		sleep 1
-	fi
+		done
+		;;
+	*)
+		echo -e "\n Opcion Invalida...!"
+		;;
+	esac
+	sleep 1	
 done
 }
 
-FuncionGrupo(){
-while true
-do
-	
+
+FuncionGrupoPrimario(){
 	while true
 	do
 		FuncionEncabezado
@@ -268,10 +309,11 @@ do
 		echo -e "Desea establecer un grupo primario para el usuario? s/n (Por defecto '$NombreUsuario')\n"
 		
 		read -p "_: " Respuesta
-			if [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
+
+		if [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
 		then
 			GrupoPrimario=`echo "$NombreUsuario"`
-			break 2
+			break 
 				
 		elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
 		then
@@ -279,9 +321,22 @@ do
 			do
 
 				FuncionEncabezado
-				echo "Ingrese grupo:"
-				echo -e "(ingrese 0 para utilizar el grupo por defecto, ingrese 00 para volver al Menu Principal.)\n"
+			
+				echo -e "(Ingrese 0 para utilizar el grupo por defecto, ingrese 00 para volver al Menu Principal.)"
+				echo -e "(Ingrese *lista* para poder ver los grupos disponibles)\n"	
+				echo -e "Ingrese grupo:\n"			
 				read -p "_: " GrupoPrimario
+				GrupoPrimario=`echo -e "$GrupoPrimario" | tr [:upper:] [:lower:]`
+
+				if [ "$GrupoPrimario" = "*lista*" ]
+				then
+					FuncionListarGrupos
+					echo "Ingrese grupo:\n"			
+					read -p "_: " GrupoPrimario
+					GrupoPrimario=`echo -e "$GrupoPrimario" | tr [:upper:] [:lower:]`
+				fi	
+				
+
 				if [ -z $GrupoPrimario ]
 				then
 					echo -e "\nCampo Vacio!.."
@@ -293,9 +348,7 @@ do
 					elif [ "$GrupoPrimario" = "00" ]
 					then
 						FuncionSalir
-					fi
-		
-					if [ `cat /etc/group | cut -f1 -d: | grep -x $GrupoPrimario | wc -l` = 1 ]
+					elif [ `cat /etc/group | cut -f1 -d: | grep -x $GrupoPrimario | wc -l` = 1 ]
 					then
 						break 2
 					else
@@ -309,98 +362,134 @@ do
 		else
 			echo -e "\n Opcion Invalida...!"
 		fi
-		
-		
 		sleep 1
 	done
 	
-	#GruposSecundarios
-	while true
-	do
-		FuncionEncabezado
-		
-		echo -e "Desea agregar el usuario a otros grupos? s/n"
-		echo -e "(Grupos actuales del usuario.Primario:'$GrupoPrimario'.Secundario:'$GrupoSecundario')\n"
-		
-		read -p "_: " Respuesta
-			if [ -z "$Respuesta" ] || [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
-		then
-			break 2
-				
-		elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
-		then
-			while true
-			do
 
+}
+
+FuncionGrupoSecundario(){
+while true
+do
+	FuncionEncabezado
+	
+	echo -e "Desea ingresar grupos secundarios a este usuario? s/n "
+	if [ -z "$GrupoSecundario" ]
+	then
+		echo -e "(Grupos actuales del usuario.Primario:'$GrupoPrimario'.)\n"
+	else
+		echo -e "(Grupos actuales del usuario.Primario:'$GrupoPrimario'.Secundario:'$GrupoSecundario')\n"
+	fi
+	
+	
+	read -p "_: " Respuesta
+
+	if [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
+	then
+		break 
+			
+	elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
+	then
+		while true
+		do
+
+			FuncionEncabezado
+			echo "(Grupos secundarios actuales del usuario :'$GrupoSecundario')"
+			echo -e "(Ingrese 0 para salir al menu principal)"
+			
+			if [ -z "$GrupoSecundario" ]
+			then
+				echo -e "(Ingrese 00 para cancelar los grupos secundarios.)"
+			else
+				echo -e "(Ingrese 00 para cancelar los grupos secundarios.)"
+				echo -e "(Ingrese 000 para cancelar, conservando los grupos secundarios: $GrupoSecundario)"
+			fi
+			
+			echo -e "(Ingrese '*lista*' para listar los grupos existentes)\n" 
+
+			read -p "Ingrese grupo: " Grupo
+
+			Grupo=`echo -e "$Grupo" | tr [:upper:] [:lower:]`
+
+			case $Grupo in
+			0)
+				FuncionSalir
+				;;
+			00)
+				$GrupoSecundario=""
+				break 2
+				;;
+			000)
+				if ! [ -z "GrupoSecundario" ]
+				then
+					break 2
+				fi
+				
+				;;
+			esac
+		
+			if [ "$Grupo" = "*lista*" ]
+			then
 				FuncionEncabezado
-				echo "(Grupos secundarios actuales del usuario :'$GrupoSecundario')"
-				echo -e "(Ingrese 0 para salir , Ingrese 00 para cancelar los grupos secundarios)"
-				echo -e "(Ingrese '*Lista*' para listar los grupos existentes)\n" 
+				FuncionListarGrupos
+				
 				read -p "Ingrese grupo: " Grupo
 
-						
-
-				if [ -z $Grupo ]
-				then
-					echo -e "\nCampo Vacio!.."
-				elif [ "$Grupo" = "0" ]
-				then
-
-					break 3
-				elif [ "$Grupo" = "00" ]	
-				then
-					GrupoSecundario=""
-					break 3
-				elif [ "$GrupoSecundario" = "*Lista*" ] || [ "$NombreGrupo" = "*lista*" ] || [ "$NombreGrupo" = "*LISTA*" ]
-				then
-				FuncionListar
-				fi	
-		
-					if ! [ `cat /etc/group | cut -f1 -d: | grep -x $Grupo | wc -l` = 1 ]
-					then
-						echo -e "\nGrupo Agregado..\n"
-						GrupoSecundario=`echo "$GrupoSecundario,$Grupo"`
-						while true
-						do
-							echo -e "Desea agregar otro usuario? s/n"
-							read -p "_: " Opcion
-							
-							case $Opcion in
-							s|S)
-								break
-							;;
-							n|N)
-								break 4
-							;;
-							*)
-								echo -e "\nOpcion Invalida!..."
-								sleep 1
-							esac
-						done
-					else
-						echo -e "\nEl grupo no existe!.."
-					fi
-				fi
-			sleep 1
-			done
+				Grupo=`echo -e "$Grupo" | tr [:upper:] [:lower:]`
+				ExisteGrupo=`cat /etc/group | cut -f1 -d: | grep -x $Grupo | wc -l`
+				
+			else
+				ExisteGrupo=`cat /etc/group | cut -f1 -d: | grep -x $Grupo | wc -l`
+			fi
 			
-		else
-			echo -e "\n Opcion Invalida...!"
-		fi
-		
-		
-		sleep 1
-	done
-	
-	
-done
+			if [ "$ExisteGrupo" = "1" ]
+			then
+				echo -e "\nGrupo Agregado..\n"
+				if [ -z "$GrupoSecundario" ]
+				then
+					GrupoSecundario=`echo "$Grupo"`
+				else
+					GrupoSecundario=`echo "$GrupoSecundario,$Grupo"`
+				fi
+				
+				while true
+				do
+					echo -e "Desea agregar otro usuario? s/n\n"
+					read -p "_: " Opcion
 
+					case $Opcion in
+					s|S)
+						break 2
+					;;
+					n|N)
+						break 3
+					;;
+					*)
+						echo -e "\nOpcion Invalida!..."
+						
+					esac
+					sleep 1
+				done
+			else
+				echo -e "\nEl grupo no existe!..."
+			fi	
+			
+				
+				
+		sleep 1
+		done		
+	else
+		echo -e "\n Opcion Invalida...!"
+	fi
+	sleep 1
+done
 }
 #FinFunciones
 
 #Ejecucion
 while true
 do
+	#LimpiarVariables
 	NombreUsuario=""
 	Clave=""
 	RutaHome=""
@@ -415,210 +504,106 @@ do
 	FuncionContrasena
 	#FinContraseña
 
-	#Grupo
-	FuncionGrupo
-	#FinGrupo
-		
+	#GrupoPrimario
+	FuncionGrupoPrimario
+	#FinGrupoPrimario
+	
+	#GrupoSecundario
+	FuncionGrupoSecundario
+	#FinGrupoSecundario
+	
 	#RutaHome
-	while true
-	do
-		FuncionEncabezado
-		echo -e "\nDesea especificar una ruta para el home del usuario? s/n (Por defecto '/home/') \n"
-		read -p "_: " Respuesta
-
-		
-			
-		if [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
-		then
-			RutaHome="/home/"
-			break
-			
-		
-		elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
-		then
-			FuncionRutaHome
-			break
-		else
-			echo -e "\n Opcion Invalida...!"
-		fi
-		
-	done
+	FuncionRutaHome
 	#FinRutaHome
 
 	#NombreHome
-	while true
-	do
-		FuncionEncabezado
-		echo -e "\nDesea especificar un nombre para el home del usuario? s/n (Por defecto '$NombreUsuario') \n"
-		read -p "_: " Respuesta
-
-		
-			
-		if [ "$Respuesta" = "n" ] || [ "$Respuesta" = "N" ] 
-		then
-			NombreHome=`echo "$NombreUsuario"`
-			break
-			
-		
-		elif [ "$Respuesta" = "s" ] || [ "$Respuesta" = "S" ]
-		then
-			FuncionNombreHome
-			break
-		else
-			echo -e "\n Opcion Invalida...!"
-		fi
-		sleep 1
-	done
+	FuncionNombreHome
 	#FinNombreHome
 	
-	#EjecutarAlta
-	while true
-	do
-		Home=`echo "-d $RutaHome$NombreHome -m"`
-
-		if [ $GrupoPrimario = $NombreUsuario ]
-		then
-			if [ `cat /etc/group | cut -f1 -d: | grep -x $GrupoPrimario | wc -l` = 1 ]
-			then
-				a=1
-				GrupoP=`echo "-g $GrupoPrimario"`
-			else
-				#el grupo no existe
-				a=0
-				sudo groupadd ${GrupoPrimario}
-				if ! [ $? = 0 ]
-				then
-					echo -e "\nNo se pude crear el usuario, porque no se pudo crear el grupo '$GrupoPrincipal'"
-					sleep 1
-					while true
-					do					
-						echo -e "\nIngrese '1'  para cambiar el grupo o '0' para cancelar alta y volver al Menu Principal"
-						read -p "_: " Opcion
-
-						case Opcion in
-						1)
-							while true
-							do
-
-								FuncionEncabezado
-								echo "Ingrese grupo:"
-								echo -e "(Ingrese 00 para volver al Menu Principal.)\n"
-								read -p "_: " GrupoPrimario
-
-								if [ -z $GrupoPrimario ]
-								then
-									echo -e "\nCampo Vacio!.."
-								
-								elif [ "$GrupoPrimario" = "00" ]
-								then
-									FuncionSalir
-								
-								fi
-						
-								if [ `cat /etc/group | cut -f1 -d: | grep -x $GrupoPrimario | wc -l` = 1 ]
-								then
-									break 2
-								else
-									echo -e "\nEl grupo no existe!.."
-									
-								fi
-							sleep 1
-							done
-						;;
-						0)
-							FuncionSalir
-						;;
-						*)
-							echo -e "\nOpcion Invalida!..."
-						esac
-					done
-				fi
+	#Establecemos las variables para useeradd
+	Home=`echo "-d $RutaHome$NombreHome -m"`
 	
-			fi
+	if [ `cat /etc/group | cut -f1 -d: | grep -x $GrupoPrimario | wc -l` = 1 ]
+	then
+		a=1
+	else
+		a=0
+		sudo groupadd ${GrupoPrimario}
+		#Prueba
+		read -p "presione tecla" basura
+		#FinPrueba
+	fi
+	
+	GrupoP=`echo "-g $GrupoPrimario"`
+
+	if [ -z $GrupoSecundario ]
+	then
+		GrupoS=""
+	else
+		GrupoS=`echo "-G $GrupoSecundario"`
+	fi
+
+	#Ejecutamos Alta
+	sudo useradd  ${GrupoP} ${GrupoS} ${Home} ${NombreUsuario}
+	#Prueba
+	read -p "presione tecla" basura
+	#FinPrueba
+
+	if [ $? = 0 ]
+	then
+		#no funciono sudo  echo " \n$Clave\n$Clave" | passwd $NombreUsuario
+		#Prueba
+		echo "nombreusuario $NombreUsuario , clave $Clave"
+		read -p "presione tecla" basira
+		#FinPrueba
+		echo "$NombreUsuario:$Clave" | chpasswd
+		#Prueba
+		read -p "presione tecla" basura
+		#FinPrueba
+		if [ $? = 0 ]
+		then
+			echo "Se ha creado el usuario correctamente"
+						
 		else
-			GrupoP=`echo "-g $GrupoPrimario"`
+			echo "El usuario se ha creado sin contraseña, intente ingresar la contraseña manualmente."
+			
 		fi
 		
-		if [ -z $GrupoSecundario ]
+	else
+		echo "No se creo el usuario"
+		if [ "$a" = 0 ]
 		then
-			GrupoS=""
-		else
-			GrupoS=`echo "-G $GrupoSecundario"`
-		fi
-
-		while true
-		do
-			echo "$GrupoP"
-			read basura
-			sudo useradd  ${GrupoP} ${GrupoS} ${Home} ${NombreUsuario}
-
-			if [ $? = 0 ]
+			sudo grupdel ${GrupoPrimario}
+			#Prueba
+			read -p "presione" basura
+			#FinPrueba
+			if ! [ $? = 0 ]
 			then
-				sudo echo "$NombreUsuario:$clave" | chpasswd
-				if [ $? = 0 ]
-				then
-					echo "Se ha creado el usuario correctamente"
-								
-				else
-					echo "El usuario se ha creado sin contraseña, intente ingresar la contraseña manualmente."
-					
-				fi
-				
-			else
-				echo "No se creo el usuario"
-				if [ "$a" = 0 ]
-				then
-					sudo grupdel ${GrupoPrimario}
-
-					if ! [ $? = 0 ]
-					then
-						echo "El grupo $GrupoPrincipal no se ha podido elimiar. Se debera eliminar manualmente."
-					
-					fi
-				fi
+				echo "El grupo $GrupoPrincipal no se ha podido elimiar. Se debera eliminar manualmente."
+			
 			fi
-			read -p "Presione una tecla para continuar..." basura
-			while true
-			do
-				read -p "presione tecla" basura
-
-				FuncionEncabezado
-				echo -e "Desea agregar otro usuario? s/n "
-				read -p "_: " Opcion
-				
-				case "$Opcion" in
-				s|S)
-					break 3
-				;;
-				n|N)
-					FuncionSalir
-				;;
-				*)
-					echo -e "\n Opcion Incorrecta!"
-				esac
-			done
-		done
-			#FinEjecutarAlta
-	done	
+		fi
+	fi
+	sleep 2
+	while true
+	do
+		
+		FuncionEncabezado
+		echo -e "Desea agregar otro usuario? s/n \n"
+		read -p "_: " Opcion
+		
+		case "$Opcion" in
+		s|S)
+			break 
+		;;
+		n|N)
+			FuncionSalir
+		;;
+		*)
+			echo -e "\n Opcion Incorrecta!"
+		esac
+	done
 done
-#FinEjecucion
-
-
-
-
 
 #FinAltaUsuario
-
-
-
-
-
-
-
-
-
-
-
-
-
 

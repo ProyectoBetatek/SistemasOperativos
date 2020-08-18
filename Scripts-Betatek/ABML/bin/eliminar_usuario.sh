@@ -75,7 +75,7 @@ do
 						1)
 							echo "#elimimnar usuario y home"
 							#elimimnar usuario y home
-							sudo userdel -r $NombreUsuario
+							sudo userdel -r $NombreUsuario 2> /dev/null
 							if [ $? = 0 ] 
 							then
 								echo "Se ha eliminado el usuario y su informacion"
