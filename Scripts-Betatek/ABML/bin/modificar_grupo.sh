@@ -177,7 +177,7 @@ let Tail=$TotalLineas-$Linea
 
 cat /etc/group | tail -n"$Tail" | cut -f1 -d: | column
 echo -e "\n\n"
-read -p "Presione una tecla para continuar..." basura
+
 }
 #FinFunciones
 
@@ -194,13 +194,15 @@ do
 		
 	read -p "_:" NombreGrupo
 	Resultado=`cat /etc/group | cut -d: -f1 | grep -x "$NombreGrupo" | wc -l`
-
+	if [ "$NombreGrupo" = "*Lista*" ] || [ "$NombreGrupo" = "*lista*" ] || [ "$NombreGrupo" = "*LISTA*" ]
+	then
+		FuncionListar
+		read -p "Ingrese nombre grupo_:" NombreGrupo
+	fi
+	
 	if [ "$NombreGrupo" = 0 ]
 	then
 		FuncionSalir
-	elif [ "$NombreGrupo" = "*Lista*" ] || [ "$NombreGrupo" = "*lista*" ] || [ "$NombreGrupo" = "*LISTA*" ]
-	then
-		FuncionListar
 	else
 	
 		if [ "$Resultado" = 1 ]

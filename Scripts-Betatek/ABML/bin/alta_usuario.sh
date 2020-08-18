@@ -140,7 +140,7 @@ do
 	#Revisamos campo vacio
 	if ! [ -z "$NombreUsuario" ]
 	then
-		#Revisamos que haya ingresado solo carateres alfanumericos
+		#Revisamos que haya ingresado solo carateres alfanumericos o guion bajo
 		if [[ -z `echo $NombreUsuario |tr -d "_"| tr -d "[:alnum:]"` ]]
 		then
 

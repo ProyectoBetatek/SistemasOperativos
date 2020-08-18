@@ -25,8 +25,6 @@ let Tail=$TotalLineas-$Linea
 #echo "tail $Tail"
 cat /etc/passwd | tail -n"$Tail" | cut -f1 -d: | column
 echo -e "\n\n"
-read -p "Presione una tecla para salir..." basura
-FuncionSalir
 
 }
 #FinFunciones
@@ -38,92 +36,88 @@ do
 	echo -e "Ingrese el nombre del usuario a eliminar.\n(Ingrese '0' para salir) o (Ingrese '*lista*' para poder ver los grupos existentes\n)"
 	read -p "_: " NombreUsuario
 		
-	
-	if [ "$NombreUsuario" = 0 ]
-	then
-		FuncionSalir
-	elif [ "$NombreUsuario" = "*Lista*" ] || [ "$NombreUsuario" = "*lista*" ] || [ "$NombreUsuario" = "*LISTA*" ]
+	if [ "$NombreUsuario" = "*Lista*" ] || [ "$NombreUsuario" = "*lista*" ] || [ "$NombreUsuario" = "*LISTA*" ]
 	then
 		echo ""
 		echo ""
 		FuncionListar
-	else
-	
-	while true
-	do
-		echo -e "\n Esta seguro que desea elminar al usuario '$NombreUsuario'? s/n \n"
-		read -p "_: " Opcion
+		read -p "_: " NombreUsuario
+	fi
+	if ! [  -z $NombreUsuario ]
+	then
 		
-		case "$Opcion" in
+		if [ "$NombreUsuario" = 0 ]
+		then
+			FuncionSalir
 		
-		s|S)
-			sleep 1
-			clear
+		elif [ `cat /etc/passwd | cut -f 1 -d ':' | grep -x $NombreUsuario | wc -l` = 1 ]
+		then
 			while true
 			do
-				echo -e "\tElija una opcion:"
-                echo -e "\t1- Eliminar usuario y home del usuario."
-				echo -e "\t2- Eliminar usuario y conservar los datos del home del usuario."
+				echo -e "\n Esta seguro que desea elminar al usuario '$NombreUsuario'? s/n \n"
+				read -p "_: " Opcion
 				
-				read -p "Opcion_: " opcion
-		
-				case $opcion in
-			
-				1)
-					echo "#elimimnar usuario y home"
-					#elimimnar usuario y home
+				case "$Opcion" in
+				
+				s|S)
+					sleep 1
+					clear
+					while true
+					do
+						echo -e "\tElija una opcion:"
+				        echo -e "\t1- Eliminar usuario y home del usuario."
+						echo -e "\t2- Eliminar usuario y conservar los datos del home del usuario."
+						echo -e "\t3- Cancelar."
+						read -p "Opcion_: " opcion
+				
+						case $opcion in
+					
+						1)
+							echo "#elimimnar usuario y home"
+							#elimimnar usuario y home
+							sudo userdel -r $NombreUsuario
+							if [ $? = 0 ] 
+							then
+								echo "Se ha eliminado el usuario y su informacion"
+							else
+								echo "No se ha eliminado el usuario"
+
+							fi
+						;;
+						2)
+							echo "#eliminar usuario"
+							echo "#pregunatar donde guardar el home."
+							#eliminar usuario
+							#pregunatar donde guardar el home.
+						;;
+						3)
+						break 2
+						;;
+						*)
+							echo "Opcion incorrecta!..."
+							sleep 1
+							echo ""
+						esac
+					sleep 2
+
+					done
+					
 				;;
-				2)
-					echo "#eliminar usuario"
-					echo "#pregunatar donde guardar el home."
-					#eliminar usuario
-					#pregunatar donde guardar el home.
+				n|N)
+				break
 				;;
 				*)
-					echo "Opcion incorrecta!..."
-					sleep 1
-					echo ""
+					echo -e "\n Opcion Incorrecta!"
 				esac
-			sleep 2
-
 			done
+		else
+			echo -e "\nEl usuario ingresado no es correcto!..."
+			sleep 2
 			
-		;;
-		n|N)
-		break
-		;;
-		*)
-			echo -e "\n Opcion Incorrecta!"
-		esac
-	done
-	
-		
+		fi
 	fi
 	#sleep 1
 done
 #FinEliminarUsuario
 
-sudo groupdel "$NombreGrupo" 2> null
-			Resultado="$?"
-			
-			case "$Resultado" in
-			0)
-				echo -e "\n Grupo eliminado con exito!."
-			;;
-			6) 
-				echo -e "\n El grupo especificado no existe!."
-			;;	
-			8)
-				echo -e "\n No se ha podido eliminar al grupo: $NombreGrupo . Debido a que el mismo sigue siendo el grupo primariode algun usuario. \ (Para eliminarlo , no debe ser grupo primario de ningun usuario del sistema)"
-			;;
-			2)
-				echo -e "\n Sintaxis del comando no valida!!"
-			;;
-			10)
-				echo -e "\n No se pudo actualizar el archivo de grupo!"
-			esac
-			echo 
-			echo -e "\n\n"
-			read -p "Presione una tecla para continuar..." basura
-			break
 
