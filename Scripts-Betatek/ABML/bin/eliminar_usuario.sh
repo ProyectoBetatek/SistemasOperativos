@@ -8,11 +8,83 @@ FuncionEncabezado(){
 echo -e "\n\t\t--Eliminar Usuario--\n\n\n"
 
 }
+
+
 FuncionSalir(){
 		clear 
 		sleep 1
 		exit
 }
+
+FuncionEliminarUsuario(){
+sudo userdel -r $NombreUsuario 2> /dev/null
+if [ $? = 0 ] 
+then
+	echo "Se ha eliminado el usuario y su informacion"
+else
+	echo "No se ha eliminado el usuario"
+
+fi
+echo -e "\n\n"
+read -p "Presione una tecla para continuar..." basura
+}
+
+
+FuncionRespaldarHome(){
+BackupExitoso="1"
+while true
+do
+	FuncionEncabezado
+	echo -e "Ingrese el directorio en donde se respaldara el contenido del home.\n"
+	read -p "_: " Ruta
+		
+	if [ -d "$Ruta" ]
+	then
+		if ! [ `echo "$Ruta" | egrep "*/$" | wc -l` = "1" ]
+		then
+			Ruta=`echo "$Ruta/"`
+		fi
+		
+		HomeUsuario=`cat /etc/passwd | egrep "^$NombreUsuario:" | cut -f 6 -d":"`
+		Backup=`echo -e "Backup_$NombreUsuario"`
+		RutaBackup=`echo -e "$Ruta$Backup"`		
+		
+		if ! [ -d "$RutaBackup" ]
+		then
+			sudo mkdir "$RutaBackup"
+
+			if [ $? = 0 ]
+			then
+				sudo cp -r "$HomeUsuario" "$RutaBackup"
+				if [ $? = 0 ]
+				then
+					sudo chmod -R ugo+rw "$RutaBackup"
+					BackupExitoso="0"
+					echo -e "\nBackup realizado correctamente!...\n\n"
+					read -p "Presione una tecla para continuar..." basura
+					break
+					
+				else
+					echo -e "\nError al realizar backup. Intente realizar el backup manualmente!..."
+					sudo rmdir "$RutaBackup"
+				fi			
+			fi
+		else
+			echo -e "No puede realizarse el backup, la ruta contine una carpeta con el mismo nombre que la que se utilizara para el backup!..."
+			
+		fi
+		
+		
+	else
+		echo -e "La ruta no es correcta!..."
+	fi
+
+	echo -e "\n"
+	read -p "Presione una tecla para continuar..." basura	
+	
+done
+}
+
 FuncionListar(){
 Uid=`cat /etc/login.defs | egrep  "^UID_MIN*" |tr -s " " | cut -f2 -d" "`
 #echo "Uid $Uid"
@@ -64,6 +136,7 @@ do
 					clear
 					while true
 					do
+						FuncionEncabezado
 						echo -e "\tElija una opcion:"
 				        echo -e "\t1- Eliminar usuario y home del usuario."
 						echo -e "\t2- Eliminar usuario y conservar los datos del home del usuario."
@@ -73,22 +146,21 @@ do
 						case $opcion in
 					
 						1)
-							echo "#elimimnar usuario y home"
+							
 							#elimimnar usuario y home
-							sudo userdel -r $NombreUsuario 2> /dev/null
-							if [ $? = 0 ] 
-							then
-								echo "Se ha eliminado el usuario y su informacion"
-							else
-								echo "No se ha eliminado el usuario"
-
-							fi
+							FuncionEliminarUsuario
+							break 2
 						;;
 						2)
-							echo "#eliminar usuario"
-							echo "#pregunatar donde guardar el home."
 							#eliminar usuario
 							#pregunatar donde guardar el home.
+							FuncionRespaldarHome
+							if [ "$BackupExitoso" = "0" ]
+							then
+								FuncionEliminarUsuario
+							
+							fi
+							break 2
 						;;
 						3)
 						break 2
@@ -104,7 +176,7 @@ do
 					
 				;;
 				n|N)
-				break
+				break 
 				;;
 				*)
 					echo -e "\n Opcion Incorrecta!"

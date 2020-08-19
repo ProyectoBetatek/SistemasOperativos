@@ -199,19 +199,30 @@ FuncionNombreHome(){
 while true
 do
 	FuncionEncabezado
-	echo -e "\nDesea especificar un nombre para el home del usuario? s/n (Por defecto '$NombreUsuario') \n"
+	if [ -z "$NombreHome" ]
+	then
+		NombreHome=`echo "$NombreUsuario"`
+	fi
+	echo -e "\nDesea especificar un nombre para el home del usuario? s/n (Por defecto '$NombreHome') \n"
 	read -p "_: " Respuesta
 
 	case $Respuesta in
 	n|N)
-		NombreHome=`echo "$NombreUsuario"`
 		break
 		;;
 	s|S)
 		while true
 		do
-			read -p "Ingrese nombre para el home : " NombreHome
-			NombreHome=`echo -e "$NombreHome" | tr tr [:upper:] [:lower:]`
+			FuncionEncabezado
+			echo -e "Ingrese nombre para el home (Ingrese 0 para cancelar):\n"
+			read -p "_: " NombreHome
+			NombreHome=`echo -e "$NombreHome" | tr [:upper:] [:lower:]`
+
+		
+			if [ "$NombreHome" = "0" ]
+			then
+				break 2
+			fi
 			#Revisamos campo vacio
 			if ! [ -z "$NombreHome" ]
 			then
@@ -227,7 +238,7 @@ do
 						if [[ `echo $NombreHome | grep " " | wc -l` = 0 ]]
 						then 
 						
-							break
+							break 2
 						
 						else
 							echo -e "\nNo se permite que el nombre del home contenga espacios."
@@ -454,12 +465,12 @@ do
 				
 				while true
 				do
-					echo -e "Desea agregar otro usuario? s/n\n"
+					echo -e "Desea agregar otro grupo secundario? s/n\n"
 					read -p "_: " Opcion
 
 					case $Opcion in
 					s|S)
-						break 2
+						break 
 					;;
 					n|N)
 						break 3
