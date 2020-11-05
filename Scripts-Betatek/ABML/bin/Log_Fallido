@@ -1,0 +1,4 @@
+#!/bin/bash
+sudo egrep "Failed|Failure" /var/log/secure
+
+
